@@ -16,6 +16,6 @@ func main(){
         fmt.Println(err)
         return
     } 
-    defer resp.Body.Close()
     fmt.Println("A mensagem é: ",resp.Header.Values("Distopia"))
 }
+    
