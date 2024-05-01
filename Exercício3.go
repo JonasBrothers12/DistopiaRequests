@@ -10,12 +10,13 @@ import (
 )
 var key,err = rsa.GenerateKey(rand.Reader,256)
 
-func Cript(mensagem string,chave_publica *rsa.PublicKey) ([]byte,error)  {
+func Cript(mensagem string,chave_publica *rsa.PublicKey) (string,error)  {
     m_encrypt,err := rsa.EncryptPKCS1v15(rand.Reader,chave_publica,[]byte(mensagem))
-    return m_encrypt,err
+    return base64.StdEncoding.EncodeToString(m_encrypt),err
 }
-func Descript(mensagemcript []byte ,chave_privada *rsa.PrivateKey) (string,error) {
-    m_decrypt,err := rsa.DecryptPKCS1v15(rand.Reader,chave_privada,mensagemcript)
+func Descript(mensagemcript string ,chave_privada *rsa.PrivateKey) (string,error) {
+	new_value,err := base64.StdEncoding.DecodeString(mensagemcript)
+    m_decrypt,err := rsa.DecryptPKCS1v15(rand.Reader,chave_privada,new_value)
     return string(m_decrypt),err
 }
 func Cripthandler(w http.ResponseWriter, r *http.Request){
@@ -25,13 +26,11 @@ func Cripthandler(w http.ResponseWriter, r *http.Request){
         fmt.Println(err)
         return
     }
-    encripi_base64 := base64.StdEncoding.EncodeToString(encriptado)
-    fmt.Fprintln(w,encripi_base64)
+    fmt.Fprintln(w,encriptado)
 }
 func Descripthandler(w http.ResponseWriter, r *http.Request){
     value := r.URL.Query().Get("value")
-    new_value,err := base64.StdEncoding.DecodeString(value)
-    Desencriptado,err := Descript(new_value,key)
+    Desencriptado,err := Descript(value,key)
     if err != nil {
         fmt.Println(err)
         return
